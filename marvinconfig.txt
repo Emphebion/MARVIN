@@ -1,0 +1,19 @@
+[common]
+devices=GSM,RFID_LED
+users=janneke,jip
+
+[users]
+jip=12398423
+janneke=12399323
+
+
+[skills]
+janneke=magier3
+jip=slotenmaker,magier2
+
+
+[GSM]
+prodid = 1234:5678
+
+[steen1]
+prodid = 1a86:7523
