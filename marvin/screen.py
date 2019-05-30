@@ -1,12 +1,8 @@
 #############################################
-# Buttons
+# Screen
 # ===========================================
 # Purpose is to:
-# - What am I for?
+# - What am I doing here?
 #############################################
 
-
-class Button(object):
-    """description of class"""
-    def __init__(self, number):
-        self.number = number
+# Placeholder class for screen

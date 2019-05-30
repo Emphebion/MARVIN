@@ -35,7 +35,7 @@ class Users:
         for username in usernames:
             user = User(username)
             self.users.append(user)
-            self.rfidmap[user.rfid] = user  # TODO: hoe zit deze map in elkaar? Is user een object?
+            self.rfidmap[user.rfid] = user
 
     def find_user_for_rfid(self, rfid):	
         if rfid in self.rfidmap:
