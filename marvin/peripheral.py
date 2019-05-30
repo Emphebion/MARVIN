@@ -1,10 +1,15 @@
-import serial, time
+import re
+from re import split
+
+import serial
+import time
 import threading
 import subprocess
 
+
 #############################################
 # Peripheral function
-#============================================
+# ===========================================
 # Purpose is to:
 # - Setup connections to the periferals
 #############################################
@@ -14,13 +19,13 @@ class Periph(object):
         self.port = port
         self.connect(self.port)
 
-    def connect(self, port, timeout = 0.1):
-        self.usbcom = serial.Serial(port, SERIAL_BAUD_RATE, timeout = timeout)
-        self.thread = threading.Thread(target = read)
+    def connect(self, port, timeout=0.1):  # TODO: ik zie een serial_baud_rate in MARVIN en in devices
+        self.usbcom = serial.Serial(port, SERIAL_BAUD_RATE, timeout=timeout)
+        self.thread = threading.Thread(target=read)
         self.thread.start()
         time.sleep(2)
 
-    def send(self,command):
+    def send(self, command):
         crc = (ord(command) ^ self.data[0] ^ self.data[1] ^ self.data[2])
         n = self.usbcom.write(self.format_msg(command, self.data[0], self.data[1], self.data[2], crc))
 
@@ -34,7 +39,7 @@ class Periph(object):
             if not data:
                 return None
             else:
-                retValue = parse_status_response(data)
+                retValue = self.parse_status_response(data)
                 return retValue
 
     def parse_status_response(data):
@@ -45,7 +50,7 @@ class Periph(object):
         endFound = False
         value = 0
 
-        while (i < 8):
+        while i < 8:
             dataByte = data[i]
 
             if dataByte == START_BYTE:
@@ -58,7 +63,7 @@ class Periph(object):
             else:
                 if (startFound == True) and (endFound == False):
                     crc ^= ord(dataByte)
-                    if (i >= (startIndex + 2)):
+                    if i >= (startIndex + 2):
                         value = value << 8
                         value ^= ord(dataByte)
 
@@ -72,41 +77,42 @@ class Periph(object):
             i = i + 1
         return 0
 
+
 #############################################
 # Interconnect function
 # ===========================================
 # Purpose is to:
 # - Setup connections to the periferals
 #############################################
-class Devices(object):
-    def __init__(self,config_file, parser):
-        self.parseConfig(config_file, parser)
+class Devices(object):  # TODO: is dit dezelfde als in devices?
+    def __init__(self, config_file, parser):
+        self.parse_config(config_file, parser)
 
-    def parseConfig(self, config_file, parser):
+    def parse_config(self, config_file, parser):
         parser.read(config_file)
 
         self.devicenames = map(lambda x:x.strip(), parser.get('common', 'devices').split(','))
         self.deviceIDs = map(lambda x:x.strip(), parser.get('common', 'devIDs').split(','))
         self.namesIDsDict = dict(zip(self.deviceIDs,self.devicenames))
-        self.portmap = self.portSelectionPerID(self.namesIDsDict)
+        self.portmap = self.port_selection_per_id(self.namesIDsDict)
         self.connectedDevices = []
         for current in self.devicenames:
-            self.connectedDevices.append(Periph(current,self.portmap(current)))
+            self.connectedDevices.append(Periph(current, self.portmap(current)))
 
-    def portSelectionPerID(self,iddict):
+    def port_selection_per_id(self, iddict):
         ttyUSBList = subprocess.check_output("ls /dev/ttyU*")
         portSort = []
         nameSort = []
         for port in ttyUSBList:
-            tempID = split(subprocess.check_output("grep PRODUCT= /sys/bus/usb-serial/devices/%s/../uevent", port),'/')
+            tempID = split(subprocess.check_output("grep PRODUCT= /sys/bus/usb-serial/devices/%s/../uevent", port), '/')
             productID = tempID[0] + ":" + tempID[1]
             print(productID)
             portSort.append(port)
             nameSort.append(iddict(productID))
         '''return namePortDict = dict(zip(nameSort,portSort))'''
 
-    def connectedSerialDevices(self):
-        device_re = re.compile(b'Bus\s+(?P<bus>\d+)\s+Device\s+(?P<device>\d+).+ID\s(?P<id>\w+:\w+)\s(?P<tag>.+)',re.I)
+    def connected_serial_devices(self):
+        device_re = re.compile(b'Bus\s+(?P<bus>\d+)\s+Device\s+(?P<device>\d+).+ID\s(?P<id>\w+:\w+)\s(?P<tag>.+)', re.I)
         df = subprocess.check_output("lsusb")
         foundDevices = []
         for i in df.split(b'\n'):
@@ -120,5 +126,5 @@ class Devices(object):
             print(device)
         return foundDevices
 
-    def getDevice(self, name):
+    def get_device(self, name):
         return self.connDevices[name]
