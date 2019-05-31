@@ -6,7 +6,7 @@ from marvin import users
 from marvin import pages
 
 import configparser
-config = configparser.ConfigParser()
+parser = configparser.ConfigParser()
 
 SERIAL_BAUD_RATE = 57600
 
@@ -22,7 +22,9 @@ SERIAL_BAUD_RATE = 57600
 #############################################
 def main():
 
-    universe = peripheral.Devices('marvinconfig.txt', config)
+    universe = devices.Devices('marvinconfig.txt', parser)
+    menu = pages.Pages('marvinconfig.txt', parser)
+    players = users.Users('marvinconfig.txt', parser)
     while True:
 
         x = 1

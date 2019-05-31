@@ -24,11 +24,7 @@ class User:
 
     
 class Users:
-    def __init__(self):
-        self.load_users()
-
-# TODO: kan dit niet handiger? lijkt 2e keer config te bevragen in user, voor iets dat eerste keer al bekend is
-    def load_users(self):
+    def __init__(self, config_file, parser):
         self.users = []
         self.rfidmap = {}
         usernames = [x.strip() for x in config.get('common', 'users').split(',')]
@@ -42,6 +38,7 @@ class Users:
             return self.rfidmap[rfid]
         return None
 
+    # TODO: change function to set a page to visible if the player (tag) has the correct skill
     def find_pages_for_rfid(self, rfid):
         user = self.find_user_for_rfid(rfid)
         pages = user.build_skill_book()

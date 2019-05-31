@@ -2,30 +2,34 @@
 # Pages
 # ===========================================
 # Purpose is to:
-# - What am I doing here?
+# - Pages is an object that contains all the pages 
 #############################################
 
-from PIL import Image, ImageTk
-
-
-class Page:
-    def __init__(self):
-        self.name = name  # TODO: copy from image name
-        self.image = 0
+class Page(object):
+    def __init__(self, name):
+        self.name = name
+        self.visible = False    # page set on visible or not after reading tag
 
     # Function to display the page
-    def display(self):
-        pass
+    def toggleVisible(self):
+        self.visible != self.visible
+        
+    
 
 
-class Pages:
+class Pages(object):
     """description of class"""
-    def __init__(self):  # TODO: op de een of andere manier verwijst deze config niet naar het marvinconfig bestand
-        pagelist = [x.strip() for x in config.get('pages', name).split(',')]
-        self.pages = ['home']
+    def __init__(self, config_file, parser):  # DONE TODO: op de een of andere manier verwijst deze config niet naar het marvinconfig bestand
+        parser.read(config_file)
+        pagenames = [x.strip() for x in parser.get('pages', name).split(',')]
+        self.pages = []
         self.index = 0
-
-
-class Menu:
-    def __init__(self):
-        self.menu = []
+        for name in self.pagenames:
+            self.pages.append(Page(name))
+        
+        
+        
+        
+        
+        
+        
