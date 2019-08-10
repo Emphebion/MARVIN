@@ -1,23 +1,48 @@
 [common]
 devices=GSM,RFID_LED
-users=janneke,jip
-
-[users]
-jip=12398423
-janneke=12399323
+pages=main,putgrootte,ontkoppelen,aansluiten,achtergrond
+users=janneke,jip,gerard,vincent,irma
+items=item1,item2,item3,item4
 
 
-[skills]
-janneke=magier3
-jip=slotenmaker,magier2
+[jip]
+tag=12398423
+skill=slotenmaker,magier2
+gm=0
+
+[janneke]
+tag=12399323
+skills=magier3
+gm=0
+
+[gerard]
+tag=12399323
+skills=magier3
+gm=1
+phone=+31621477770
+
+[vincent]
+tag=12399323
+skills=magier3
+gm=1
+phone=+31621477770
+
+[irma]
+tag=12399323
+skills=magier3
+gm=1
+phone=+31621477770
 
 
 [GSM]
-prodid = 1234:5678
+devID = 1234:5678
+baudrate = 9600
+
 
 [steen1]
-prodid = 1a86:7523
+devID = 1a86:7523
+baudrate = 9600
 
 
-[items]
-names=item1,item2,item3,item4
+[screen]
+size=480,320

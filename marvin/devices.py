@@ -12,9 +12,10 @@ import subprocess
 # - Setup connections to the periferals
 #############################################
 class Device(object):
-    def __init__(self, name, port, baudrate):
+    def __init__(self, name, port, devID, baudrate):
         self.name = name
         self.port = port
+        self.devID = devID
         self.baudrate = baudrate
         self.connect(self.port, self.baudrate)
 
@@ -90,26 +91,28 @@ class Devices(object):
 
     def parse_config(self, config_file, parser):
         parser.read(config_file)
-
         self.devicenames = map(lambda x:x.strip(), parser.get('common', 'devices').split(','))
-        self.deviceIDs = map(lambda x:x.strip(), parser.get('common', 'devIDs').split(','))
-        self.namesIDsDict = dict(zip(self.deviceIDs,self.devicenames))
-        self.portmap = self.port_selection_per_id(self.namesIDsDict)
         self.connectedDevices = []
+        self.deviceIDs = []
+        self.portmap = []
         for current in self.devicenames:
-            self.connectedDevices.append(Device(current, self.portmap(current)))
+            dID = map(lambda x:x.strip(), parser.get(current, 'devID').split(','))
+            baudrate = map(lambda x:x.strip(), parser.get(current, 'baudrate').split(','))
+            self.deviceIDs.append(dID)
+            port = self.port_by_id(dID)
+            self.portmap.append(port)
+            self.connectedDevices.append(Device(current, port, dID, baudrate))
+        self.namesIDsDict = dict(zip(self.deviceIDs,self.devicenames))
 
-    def port_selection_per_id(self, iddict):
+    def port_by_id(self, currentID):
         ttyUSBList = subprocess.check_output("ls /dev/ttyU*")
-        portSort = []
-        nameSort = []
         for port in ttyUSBList:
             tempID = split(subprocess.check_output("grep PRODUCT= /sys/bus/usb-serial/devices/%s/../uevent", port), '/')
-            productID = tempID[0] + ":" + tempID[1]
-            print(productID)
-            portSort.append(port)
-            nameSort.append(iddict(productID))
-        '''return namePortDict = dict(zip(nameSort,portSort))'''
+            portID = tempID[0] + ":" + tempID[1]
+            print(portID)
+            if currentID == portID:
+                return port
+        return 0
 
     def connected_serial_devices(self):
         device_re = re.compile(b'Bus\s+(?P<bus>\d+)\s+Device\s+(?P<device>\d+).+ID\s(?P<id>\w+:\w+)\s(?P<tag>.+)', re.I)
@@ -127,4 +130,4 @@ class Devices(object):
         return foundDevices
 
     def get_device(self, name):
-        return self.connDevices[name]
+        return self.connectedDevices[name]

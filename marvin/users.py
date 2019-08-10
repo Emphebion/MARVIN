@@ -8,28 +8,34 @@
 
 class User:
     """description of class"""
-    def __init__(self, name):
-        self.name = name   # TODO: op de een of andere manier verwijst deze config niet naar het marvinconfig bestand
-        self.rfid = config.getint('users', name)
-        self.skills = [x.strip() for x in config.get('skills', name).split(',')]
-        self.set_gamemaster_mode()
-        
-    def set_gamemaster_mode(self):
-        self.GM = 0
-        self.GM = config.getint('gamemasters', name)
-        if self.GM > 0:
-            self.phone = config.getint('phonenumbers', name)
+    def __init__(self, name, rfid, skills, gm, phone):
+        if gm:
+            self.name = name
+            self.rfid = rfid
+            self.skills = ["putgrootte","ontkoppelen","aansluiten"]
+            self.gm = gm
+            self.phone = phone
         else:
-            self.phone = 0
+            self.name = name
+            self.rfid = rfid
+            self.skills = skills
+            self.gm = False
+            self.phone = phone
 
     
 class Users:
     def __init__(self, config_file, parser):
         self.users = []
         self.rfidmap = {}
-        usernames = [x.strip() for x in config.get('common', 'users').split(',')]
-        for username in usernames:
-            user = User(username)
+        usernames = [x.strip() for x in parser.get('common', 'users').split(',')]
+        for name in usernames:
+            rfid = parser.getint(name,'tag')
+            skills = [x.strip() for x in parser.get(name, 'skills').split(',')]
+            gm = bool(parser.getint('users', name))
+            phone = ""
+            if gm:
+                phone = parser.get(name, 'phone')
+            user = User(name,rfid,skills,gm,phone)
             self.users.append(user)
             self.rfidmap[user.rfid] = user
 
@@ -38,8 +44,13 @@ class Users:
             return self.rfidmap[rfid]
         return None
 
-    # TODO: change function to set a page to visible if the player (tag) has the correct skill
-    def find_pages_for_rfid(self, rfid):
-        user = self.find_user_for_rfid(rfid)
-        pages = user.build_skill_book()
-        return pages
+    # DONE: TODO: change function to set a page to visible if the player (tag) has the correct skill
+    def find_pages_for_rfid(self, rfid, menu):
+        user = self.find_user_for_rfid(rfid) # Only constructeurs allowed in users list
+        if user:
+            menu.get_page("main").set_visible(True)
+            for skill in user.skills:
+                if skill == ("putgrootte"|"ontkoppelen"|"aansluiten"):
+                    menu.get_page(skill).set_visible(True)
+        else:
+            menu.hide_all()
